@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Node Mongo Database CRUD.</h1>
+    <form action="/addStudent" method="post">
+        <input type="text" name="name" placeholder="name" id="">
+        <input type="text" name="roll" placeholder="student roll" id="">
+        <input type="text" name="department" placeholder="department" id="">
+        <input type="submit" value="Add student">
+    </form>
+    <div id="studentList">
+        
+    </div>
+    <div id="editData">
+        
+    </div>
+    <script>
+      const addStudentData = () =>{
+          fetch('/addStudent')
+          .then(result => result.json())
+          .then(data => console.log(data));
+      }
+      const getStudentData = () =>{
+        fetch('/allStudent')
+        .then(res => res.json())
+        .then(studentData => {
+            for (let i = 0; i < studentData.length; i++) {
+                const createData = document.createElement('p');
+                const studentList = document.getElementById('studentList');
+
+                const studentInfo = studentData[i];
+                createData.innerHTML = `
+                    <strong>Name: ${studentInfo.name}</strong> - 
+                    Roll: ${studentInfo.roll} - 
+                    department: ${studentInfo.department} 
+                    <button onclick="editStudentData('${studentInfo._id}')">Edit</button>
+                    <button onclick="deleteStudentData('${studentInfo._id}')">Delete</button>
+                `;
+                studentList.appendChild(createData);
+            }
+        });
+      }
+
+      const deleteStudentData = (id) => {
+          fetch(`/deleteStudentData/${id}`, {
+              method: 'DELETE',
+          });
+      }
+
+      const editStudentData = (id) => {
+          fetch(`/edit/${id}`)
+          .then(res => res.json())
+          .then(studentData => {
+            const editData = document.getElementById('editData');
+            editData.innerHTML = `
+                Name: <input type="text" name="name" id="name" value=${studentData.name}> <br>  
+                Roll: <input type="text" name="roll" id="roll" value=${studentData.roll}> <br>     
+                Department: <input type="text" name="department" id="department" value=${studentData.department}> <br>
+                <button onclick="updateData('${id}')">Update</button>
+            `;
+          })
+      }
+
+      const updateData = (id) => {
+          const name = document.getElementById('name').value;
+          const roll = document.getElementById('roll').value;
+          const department = document.getElementById('department').value;
+          const newData = {name, roll, department};
+          fetch(`/update/${id}`,{
+                method: 'PATCH',
+                headers: {
+                        'Content-type': 'application/json; charset=UTF-8',
+                    },
+                body: JSON.stringify(newData)
+          })
+          .then(res => res.json())
+          .then(data => console.log('update successfully'));
+
+      }
+
+      getStudentData();
+      addStudentData();
+    </script>
+</body>
+</html>
